@@ -1,4 +1,8 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { GetStaticProps } from 'next';
+import Head from 'next/head';
+import { AiOutlineCalendar } from 'react-icons/ai';
+import { IoPersonOutline } from 'react-icons/io5';
 
 import { getPrismicClient } from '../services/prismic';
 
@@ -24,9 +28,83 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-// export default function Home() {
-//   // TODO
-// }
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export default function Home() {
+  return (
+    <>
+      <Head>Home | spacetraveling</Head>
+      <main className={styles.container}>
+        <div className={styles.content}>
+          <ul>
+            <li>
+              <a href="http://localhost:3000/">
+                <section>
+                  <h1>Como utilizar Hooks</h1>
+                  <p>
+                    Pensando em sincronização em vez de ciclos de vida.Pensando
+                    em sincronização em vez de ciclos de vida Pensando em
+                    sincronização em vez de ciclos de vida Pensando em
+                    sincronização em vez de ciclos de vida Pensando em
+                    sincronização em vez de ciclos de vida Pensando em
+                    sincronização em vez de ciclos de vida Pensando em
+                  </p>
+                </section>
+              </a>
+              <div>
+                <AiOutlineCalendar />
+                <span>15 Mar 2021</span>
+                <IoPersonOutline />
+                <span>Joseph Oliveira</span>
+              </div>
+            </li>
+            <li>
+              <a href="http://localhost:3000/">
+                <section>
+                  <h1>Como utilizar Hooks</h1>
+                  <p>Pensando em sincronização em vez de ciclos de vida.</p>
+                </section>
+              </a>
+              <div>
+                <AiOutlineCalendar />
+                <span>15 Mar 2021</span>
+                <IoPersonOutline />
+                <span>Joseph Oliveira</span>
+              </div>
+            </li>
+            <li>
+              <a href="http://localhost:3000/">
+                <section>
+                  <h1>Como utilizar Hooks</h1>
+                  <p>Pensando em sincronização em vez de ciclos de vida.</p>
+                </section>
+              </a>
+              <div>
+                <AiOutlineCalendar />
+                <span>15 Mar 2021</span>
+                <IoPersonOutline />
+                <span>Joseph Oliveira</span>
+              </div>
+            </li>
+            <li>
+              <a href="http://localhost:3000/">
+                <section>
+                  <h1>Como utilizar Hooks</h1>
+                  <p>Pensando em sincronização em vez de ciclos de vida.</p>
+                </section>
+              </a>
+              <div>
+                <AiOutlineCalendar />
+                <span>15 Mar 2021</span>
+                <IoPersonOutline />
+                <span>Joseph Oliveira</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </main>
+    </>
+  );
+}
 
 // export const getStaticProps = async () => {
 //   // const prismic = getPrismicClient();
