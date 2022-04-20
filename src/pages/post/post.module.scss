@@ -1,1 +1,38 @@
-// TODO
+.container{
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.content{
+    margin-top: 3rem;
+    color: var(--body);
+    font-size: 1.125rem;
+    font-weight: 400;
+
+    h1, h2, h3, h4, h5{
+      color: var(--heading);
+    }
+
+    h2, h3, h4, h5{
+      font-size: 2rem;
+      margin: 2rem 0;
+    }
+
+    h1{
+      font-size: 3rem;
+      font-weight: 700;
+    }
+}
+.postInfo{
+  margin: 1rem 0 3rem 0;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+
+  color: var(--info);
+
+  span{
+    margin: 0 1rem 0 0.325rem;
+  }
+}

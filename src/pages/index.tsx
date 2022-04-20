@@ -3,10 +3,15 @@ import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import { AiOutlineCalendar } from 'react-icons/ai';
 import { IoPersonOutline } from 'react-icons/io5';
+import Link from 'next/link';
+import Prismic from '@prismicio/client';
+// import { RichText } from 'prismic-dom';
 
+// import commonStyles from '../styles/common.module.scss';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 import { getPrismicClient } from '../services/prismic';
 
-import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 
 interface Post {
@@ -29,76 +34,31 @@ interface HomeProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export default function Home() {
+export default function Home({ postsPagination }: HomeProps) {
   return (
     <>
       <Head>Home | spacetraveling</Head>
       <main className={styles.container}>
         <div className={styles.content}>
           <ul>
-            <li>
-              <a href="http://localhost:3000/">
-                <section>
-                  <h1>Como utilizar Hooks</h1>
-                  <p>
-                    Pensando em sincronização em vez de ciclos de vida.Pensando
-                    em sincronização em vez de ciclos de vida Pensando em
-                    sincronização em vez de ciclos de vida Pensando em
-                    sincronização em vez de ciclos de vida Pensando em
-                    sincronização em vez de ciclos de vida Pensando em
-                    sincronização em vez de ciclos de vida Pensando em
-                  </p>
-                </section>
-              </a>
-              <div>
-                <AiOutlineCalendar />
-                <span>15 Mar 2021</span>
-                <IoPersonOutline />
-                <span>Joseph Oliveira</span>
-              </div>
-            </li>
-            <li>
-              <a href="http://localhost:3000/">
-                <section>
-                  <h1>Como utilizar Hooks</h1>
-                  <p>Pensando em sincronização em vez de ciclos de vida.</p>
-                </section>
-              </a>
-              <div>
-                <AiOutlineCalendar />
-                <span>15 Mar 2021</span>
-                <IoPersonOutline />
-                <span>Joseph Oliveira</span>
-              </div>
-            </li>
-            <li>
-              <a href="http://localhost:3000/">
-                <section>
-                  <h1>Como utilizar Hooks</h1>
-                  <p>Pensando em sincronização em vez de ciclos de vida.</p>
-                </section>
-              </a>
-              <div>
-                <AiOutlineCalendar />
-                <span>15 Mar 2021</span>
-                <IoPersonOutline />
-                <span>Joseph Oliveira</span>
-              </div>
-            </li>
-            <li>
-              <a href="http://localhost:3000/">
-                <section>
-                  <h1>Como utilizar Hooks</h1>
-                  <p>Pensando em sincronização em vez de ciclos de vida.</p>
-                </section>
-              </a>
-              <div>
-                <AiOutlineCalendar />
-                <span>15 Mar 2021</span>
-                <IoPersonOutline />
-                <span>Joseph Oliveira</span>
-              </div>
-            </li>
+            {postsPagination?.results.map(post => (
+              <li key={post.uid}>
+                <Link href={`/post/${post.uid}`}>
+                  <a>
+                    <section>
+                      <h1>{post.data.title}</h1>
+                      <p>{post.data.subtitle}</p>
+                    </section>
+                  </a>
+                </Link>
+                <div>
+                  <AiOutlineCalendar />
+                  <span>{post.first_publication_date}</span>
+                  <IoPersonOutline />
+                  <span>{post.data.author}</span>
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
       </main>
@@ -106,9 +66,43 @@ export default function Home() {
   );
 }
 
-// export const getStaticProps = async () => {
-//   // const prismic = getPrismicClient();
-//   // const postsResponse = await prismic.query(TODO);
+export const getStaticProps: GetStaticProps = async () => {
+  const prismic = getPrismicClient();
 
-//   // TODO
-// };
+  const response = await prismic.query(
+    [Prismic.predicates.at('document.type', 'post')],
+    {
+      fetch: ['post.slug', 'post.title', 'post.author', 'post.subtitle'],
+      pageSize: 100,
+    }
+  );
+
+  const posts = response.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: format(
+        new Date(post.last_publication_date),
+        'dd MMMM yyyy',
+        {
+          locale: ptBR,
+        }
+      ),
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      },
+    };
+  });
+
+  const postsPagination = {
+    next_page: '',
+    results: posts,
+  };
+
+  return {
+    props: {
+      postsPagination,
+    },
+  };
+};
