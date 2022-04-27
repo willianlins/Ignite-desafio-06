@@ -1,3 +1,4 @@
+/* eslint-disable react/button-has-type */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
@@ -10,6 +11,7 @@ import Prismic from '@prismicio/client';
 // import commonStyles from '../styles/common.module.scss';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { useEffect, useState } from 'react';
 import { getPrismicClient } from '../services/prismic';
 
 import styles from './home.module.scss';
@@ -35,31 +37,78 @@ interface HomeProps {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export default function Home({ postsPagination }: HomeProps) {
+  const [posts, setPosts] = useState<PostPagination>();
+
+  useEffect(() => {
+    setPosts(postsPagination);
+  }, []);
+
+  async function nextPagesPosts() {
+    const nextPostAutx = posts.next_page;
+    await fetch(nextPostAutx)
+      .then(response => response.json())
+      .then(data => {
+        const tst = data?.results.map(post => {
+          return {
+            uid: post.uid,
+            first_publication_date: format(
+              new Date(post.first_publication_date),
+              'dd MMMM yyyy',
+              {
+                locale: ptBR,
+              }
+            ),
+            data: {
+              title: post.data.title,
+              subtitle: post.data.subtitle,
+              author: post.data.author,
+            },
+          };
+        });
+
+        const base = {
+          next_page: data?.next_page,
+          results: posts.results.concat(tst),
+        };
+        setPosts(base);
+      });
+  }
+
   return (
     <>
-      <Head>Home | spacetraveling</Head>
+      <Head>
+        <title>Home | spacetraveling</title>
+      </Head>
       <main className={styles.container}>
         <div className={styles.content}>
           <ul>
-            {postsPagination?.results.map(post => (
-              <li key={post.uid}>
-                <Link href={`/post/${post.uid}`}>
+            {posts?.results.map(post => (
+              <li key={post?.uid}>
+                <Link href={`/post/${post?.uid}`}>
                   <a>
                     <section>
-                      <h1>{post.data.title}</h1>
-                      <p>{post.data.subtitle}</p>
+                      <h1>{post?.data.title}</h1>
+                      <p>{post?.data.subtitle}</p>
                     </section>
                   </a>
                 </Link>
                 <div>
                   <AiOutlineCalendar />
-                  <span>{post.first_publication_date}</span>
+                  <span>{post?.first_publication_date}</span>
                   <IoPersonOutline />
-                  <span>{post.data.author}</span>
+                  <span>{post?.data.author}</span>
                 </div>
               </li>
             ))}
           </ul>
+          {posts.next_page && (
+            <button
+              className={styles.MaisPosts}
+              onClick={() => nextPagesPosts()}
+            >
+              Carregar mais posts
+            </button>
+          )}
         </div>
       </main>
     </>
@@ -73,7 +122,7 @@ export const getStaticProps: GetStaticProps = async () => {
     [Prismic.predicates.at('document.type', 'post')],
     {
       fetch: ['post.slug', 'post.title', 'post.author', 'post.subtitle'],
-      pageSize: 100,
+      pageSize: 1,
     }
   );
 
@@ -96,7 +145,7 @@ export const getStaticProps: GetStaticProps = async () => {
   });
 
   const postsPagination = {
-    next_page: '',
+    next_page: response.next_page,
     results: posts,
   };
 

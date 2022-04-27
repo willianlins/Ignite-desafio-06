@@ -1,3 +1,4 @@
+/* eslint-disable react/no-danger */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { GetStaticPaths, GetStaticProps } from 'next';
@@ -8,6 +9,8 @@ import { BiTimeFive } from 'react-icons/bi';
 
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { RichText } from 'prismic-dom';
+import { parse } from 'node-html-parser';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -35,69 +38,51 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+  let totalTexto: string;
+  let arrayPalavras: string[];
+
+  const tempoLeitura = post.data.content.reduce((ac, element) => {
+    totalTexto += `${element.heading} ${parse(String(element.body))}`;
+
+    arrayPalavras = totalTexto.split(/\s/);
+
+    return ac + Math.ceil(arrayPalavras.length / 200);
+  }, 0);
+
   return (
     <>
-      <Head> | spacetraveling</Head>
+      <Head>
+        <title>{post.data.title} | spacetraveling</title>
+      </Head>
 
-      <img src="/Banner.png" alt="" />
+      <img className={styles.img} src={post.data.banner.url} alt="" />
       <main className={styles.container}>
         <article className={styles.content}>
           <div>
-            <h1>
-              Prisma: uma das melhores coisas que já aconteceu no ecossistema?
-            </h1>
+            <h1>{post.data.title}</h1>
             <div className={styles.postInfo}>
               <AiOutlineCalendar />
-              <span>15 Mar 2021</span>
+              <span>{post.first_publication_date}</span>
               <IoPersonOutline />
-              <span>Joseph Oliveira</span>
+              <span>{post.data.author}</span>
               <BiTimeFive />
-              <span>4 min</span>
+              <span>{tempoLeitura} min</span>
             </div>
           </div>
-          <p>
-            <h2>Um breve arquivo</h2> sobre a origem da ferramenta que facilitou
-            o acesso de databases e ampliou produtividade para o ecossistema
-            JavaScript/TypeScript
-          </p>
-          <p>
-            Dividido em três camadas como núcleo de sua arquitetura, o Prisma
-            nasceu no ecossistema JavaScript com a promessa de ser uma
-            ferramenta facilitadora e produtiva para devs que trabalham
-            diretamente com databases. Por uma série de razões, a tecnologia
-            chegou a ser reconhecida como “uma das melhores coisas que já
-            aconteceu” na programação backend entre usuários de Node.js. O
-            artigo desta semana pretende levantar um arquivo sobre o Prisma e
-            entender os motivos da tecnologia ter obtido tanta relevância ao
-            longo desses anos. Se você acompanha nossa plataforma e acessou
-            recentemente nossos conteúdos no YouTube, já deve ter reparado que
-            estamos de olho na performance do Prisma há bastante tempo. Não há
-            exatamente uma data para apontar como “o dia em que foi lançado”, no
-            entanto, se entrarmos nos registros do GitHub, reparamos que os
-            primeiros repositórios do Prisma surgiram em meados de 2017, com
-            assinaturas de Lukáš Huvar e Johannes Schickling. Antes de ser
-            Prisma, o pequeno projeto era chamado de Graphcool e contava com uma
-            equipe pequena de cinco devs que pretendiam desenvolver uma solução
-            como backend-as-a-service para GraphQL. O Graphcool na época foi bem
-            recebido pela comunidade, principalmente por ser “fácil de usar” até
-            para devs Frontend. Nikolas Burk, um dos primeiros devs da equipe,
-            reconheceu nesta thread que, apesar do projeto ter potencial na
-            época, não conseguiu escalar por conta da falta de flexibilidade. A
-            solução foi desenvolver, ao longo de uma série de tentativas, o
-            Prisma 1.0, em 2018. O Prisma Client foi anunciado meses depois. A
-            tecnologia atualmente se encontra em sua terceira etapa de
-            desenvolvimento, chamada de Prisma 3, uma versão com recursos mais
-            avançados e consistentes. Apesar do nome numérico, o produto oficial
-            do Prisma, que engloba todos os serviços da tecnologia, está no
-            Prisma Client e Studio, este último lançado em novembro de 2019.
-          </p>
+
+          {post.data.content.map(el => (
+            <div key={el.heading}>
+              <h2>{el.heading}</h2>
+              <div dangerouslySetInnerHTML={{ __html: String(el.body) }} />
+            </div>
+          ))}
         </article>
       </main>
     </>
   );
 }
 
-export const getStaticPaths = async () => {
+export const getStaticPaths: GetStaticPaths = async () => {
   // const prismic = getPrismicClient();
   // const posts = await prismic.query(TODO);
   return {
@@ -107,12 +92,11 @@ export const getStaticPaths = async () => {
   // TODO
 };
 
-export const getStaticProps = async ({ req, params }) => {
+export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params;
-  const prismic = getPrismicClient(req);
+  const prismic = getPrismicClient(params.req);
   const response = await prismic.getByUID('post', String(slug), {});
-  // console.log(response.data.content);
-  const posts = {
+  const post = {
     first_publication_date: format(
       new Date(response.last_publication_date),
       'dd MMMM yyyy',
@@ -122,35 +106,23 @@ export const getStaticProps = async ({ req, params }) => {
     ),
     data: {
       title: response.data.title,
-      banner: response.data.banner.url,
+      banner: {
+        url: response.data.banner.url,
+      },
       author: response.data.author,
       content: response.data.content.map(element => {
         return {
-          heading: element.heading.text,
-          body: element.body,
+          heading: RichText.asText(element.heading),
+          body: RichText.asHtml(element.body),
         };
       }),
-      // [response.data.content.body.text],
     },
   };
 
-  // first_publication_date: string | null;
-  // data: {
-  //   title: string;
-  //   banner: {
-  //     url: string;
-  //   };
-  //   author: string;
-  //   content: {
-  //     heading: string;
-  //     body: {
-  //       text: string;
-  //     }[];
-  //   }[];
-  // };
-
-  console.log(posts.data.content.content);
   return {
-    props: {},
+    props: {
+      post,
+    },
+    revalidate: 60 * 60 * 5, // 5hours
   };
 };

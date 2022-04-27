@@ -4,6 +4,7 @@
   padding: 0 2rem;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
 
   ul{
@@ -54,5 +55,16 @@
         }
       }
     }
+  }
+}
+.MaisPosts{
+  color: var(--highlight);
+  cursor: pointer;
+  margin-bottom: 5rem;
+  transition: all 0.2s;
+  background: none;
+  border: 0;
+  &:hover{
+    filter: brightness(0.9);
   }
 }

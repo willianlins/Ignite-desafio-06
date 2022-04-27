@@ -1,3 +1,8 @@
+.img{
+  width: 1440px;
+  max-height: 400px;
+  margin: 0 auto;
+}
 .container{
   max-width: 700px;
   margin: 0 auto;
@@ -6,9 +11,11 @@
 
 .content{
     margin-top: 3rem;
+    margin-bottom: 10rem;
     color: var(--body);
     font-size: 1.125rem;
     font-weight: 400;
+    text-align: justify;
 
     h1, h2, h3, h4, h5{
       color: var(--heading);
@@ -23,6 +30,17 @@
       font-size: 3rem;
       font-weight: 700;
     }
+
+  a{
+    color: var(--highlight)
+  }
+
+  ul, ol {
+    padding: 1.5rem;
+    li{
+      padding: 0.1875rem;
+    }
+  }
 }
 .postInfo{
   margin: 1rem 0 3rem 0;
