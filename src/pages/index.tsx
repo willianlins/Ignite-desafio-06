@@ -101,7 +101,7 @@ export default function Home({ postsPagination }: HomeProps) {
               </li>
             ))}
           </ul>
-          {posts.next_page && (
+          {posts?.next_page && (
             <button
               className={styles.MaisPosts}
               onClick={() => nextPagesPosts()}
