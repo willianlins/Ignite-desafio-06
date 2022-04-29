@@ -1,14 +1,9 @@
-/* eslint-disable react/button-has-type */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import { AiOutlineCalendar } from 'react-icons/ai';
 import { IoPersonOutline } from 'react-icons/io5';
 import Link from 'next/link';
 import Prismic from '@prismicio/client';
-// import { RichText } from 'prismic-dom';
-
-// import commonStyles from '../styles/common.module.scss';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { useEffect, useState } from 'react';
@@ -35,29 +30,22 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({ postsPagination }: HomeProps): JSX.Element {
   const [posts, setPosts] = useState<PostPagination>();
 
   useEffect(() => {
     setPosts(postsPagination);
   }, []);
 
-  async function nextPagesPosts() {
+  function nextPagesPosts(): void {
     const nextPostAutx = posts.next_page;
-    await fetch(nextPostAutx)
+    fetch(nextPostAutx)
       .then(response => response.json())
       .then(data => {
         const tst = data?.results.map(post => {
           return {
             uid: post.uid,
-            first_publication_date: post.first_publication_date, // format(
-            //   new Date(post.first_publication_date),
-            //   'dd MMMM yyyy',
-            //   {
-            //     locale: ptBR,
-            //   }
-            // ),
+            first_publication_date: post.first_publication_date,
             data: {
               title: post.data.title,
               subtitle: post.data.subtitle,
@@ -97,7 +85,7 @@ export default function Home({ postsPagination }: HomeProps) {
                   <span>
                     {format(
                       new Date(post.first_publication_date),
-                      'dd MMMM yyyy',
+                      'dd MMM yyyy',
                       {
                         locale: ptBR,
                       }
@@ -111,6 +99,7 @@ export default function Home({ postsPagination }: HomeProps) {
           </ul>
           {posts?.next_page && (
             <button
+              type="button"
               className={styles.MaisPosts}
               onClick={() => nextPagesPosts()}
             >
@@ -138,13 +127,6 @@ export const getStaticProps: GetStaticProps = async () => {
     return {
       uid: post.uid,
       first_publication_date: post.first_publication_date,
-      //  format(
-      //   new Date(post.last_publication_date),
-      //   'dd MMMM yyyy',
-      //   {
-      //     locale: ptBR,
-      //   }
-      // ),
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
