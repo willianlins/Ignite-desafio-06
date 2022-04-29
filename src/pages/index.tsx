@@ -51,13 +51,13 @@ export default function Home({ postsPagination }: HomeProps) {
         const tst = data?.results.map(post => {
           return {
             uid: post.uid,
-            first_publication_date: format(
-              new Date(post.first_publication_date),
-              'dd MMMM yyyy',
-              {
-                locale: ptBR,
-              }
-            ),
+            first_publication_date: post.first_publication_date, // format(
+            //   new Date(post.first_publication_date),
+            //   'dd MMMM yyyy',
+            //   {
+            //     locale: ptBR,
+            //   }
+            // ),
             data: {
               title: post.data.title,
               subtitle: post.data.subtitle,
@@ -94,7 +94,15 @@ export default function Home({ postsPagination }: HomeProps) {
                 </Link>
                 <div>
                   <AiOutlineCalendar />
-                  <span>{post?.first_publication_date}</span>
+                  <span>
+                    {format(
+                      new Date(post.first_publication_date),
+                      'dd MMMM yyyy',
+                      {
+                        locale: ptBR,
+                      }
+                    )}
+                  </span>
                   <IoPersonOutline />
                   <span>{post?.data.author}</span>
                 </div>
@@ -129,13 +137,14 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = response.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.last_publication_date),
-        'dd MMMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.last_publication_date,
+      //  format(
+      //   new Date(post.last_publication_date),
+      //   'dd MMMM yyyy',
+      //   {
+      //     locale: ptBR,
+      //   }
+      // ),
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
