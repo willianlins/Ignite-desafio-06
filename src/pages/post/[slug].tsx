@@ -1,6 +1,3 @@
-/* eslint-disable react/no-danger */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { AiOutlineCalendar } from 'react-icons/ai';
@@ -38,7 +35,7 @@ interface PostProps {
   post: Post;
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post }: PostProps): JSX.Element {
   let totalTexto: string;
   let arrayPalavras: string[];
   const router = useRouter();
@@ -86,6 +83,7 @@ export default function Post({ post }: PostProps) {
             <div key={String(el.heading)}>
               <h2>{String(el.heading)}</h2>
               <div
+                // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{
                   __html: String(RichText.asHtml(el.body)),
                 }}
@@ -98,6 +96,7 @@ export default function Post({ post }: PostProps) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const getStaticPaths = async () => {
   const prismic = getPrismicClient();
   const posts = await prismic.query(
