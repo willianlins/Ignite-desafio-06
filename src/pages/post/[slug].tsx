@@ -42,11 +42,14 @@ export default function Post({ post }: PostProps) {
   let arrayPalavras: string[];
 
   const tempoLeitura = post.data.content.reduce((ac, element) => {
-    totalTexto += `${element.heading} ${parse(String(element.body))}`;
+    totalTexto += `${element.heading} ${parse(
+      String(RichText.asText(element.body))
+    )}`;
 
     arrayPalavras = totalTexto.split(/\s/);
+    console.log(arrayPalavras);
 
-    return ac + Math.ceil(arrayPalavras.length / 200);
+    return ac + Math.round(arrayPalavras.length / 200);
   }, 0);
 
   return (
@@ -62,18 +65,26 @@ export default function Post({ post }: PostProps) {
             <h1>{post.data.title}</h1>
             <div className={styles.postInfo}>
               <AiOutlineCalendar />
-              <span>{post.first_publication_date}</span>
+              <span>
+                {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                  locale: ptBR,
+                })}
+              </span>
               <IoPersonOutline />
               <span>{post.data.author}</span>
               <BiTimeFive />
-              <span>{tempoLeitura} min</span>
+              <span>{tempoLeitura + 1} min</span>
             </div>
           </div>
 
           {post.data.content.map(el => (
-            <div key={el.heading}>
-              <h2>{el.heading}</h2>
-              <div dangerouslySetInnerHTML={{ __html: String(el.body) }} />
+            <div key={String(el.heading)}>
+              <h2>{String(el.heading)}</h2>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: String(RichText.asHtml(el.body)),
+                }}
+              />
             </div>
           ))}
         </article>
@@ -97,28 +108,23 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient(params.req);
   const response = await prismic.getByUID('post', String(slug), {});
   const post = {
-    first_publication_date: format(
-      new Date(response.last_publication_date),
-      'dd MMMM yyyy',
-      {
-        locale: ptBR,
-      }
-    ),
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
+      subtitle: response.data.subtitle,
       banner: {
         url: response.data.banner.url,
       },
       author: response.data.author,
       content: response.data.content.map(element => {
         return {
-          heading: RichText.asText(element.heading),
-          body: RichText.asHtml(element.body),
+          heading: element.heading,
+          body: element.body,
         };
       }),
     },
   };
-
   return {
     props: {
       post,
