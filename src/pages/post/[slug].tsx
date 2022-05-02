@@ -6,11 +6,12 @@ import Head from 'next/head';
 import { AiOutlineCalendar } from 'react-icons/ai';
 import { IoPersonOutline } from 'react-icons/io5';
 import { BiTimeFive } from 'react-icons/bi';
-
+import Primisc from '@prismicio/client';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { RichText } from 'prismic-dom';
 import { parse } from 'node-html-parser';
+import { useRouter } from 'next/router';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -40,6 +41,7 @@ interface PostProps {
 export default function Post({ post }: PostProps) {
   let totalTexto: string;
   let arrayPalavras: string[];
+  const router = useRouter();
 
   const tempoLeitura = post.data.content.reduce((ac, element) => {
     totalTexto += `${element.heading} ${parse(
@@ -47,10 +49,13 @@ export default function Post({ post }: PostProps) {
     )}`;
 
     arrayPalavras = totalTexto.split(/\s/);
-    console.log(arrayPalavras);
 
     return ac + Math.round(arrayPalavras.length / 200);
   }, 0);
+
+  if (router.isFallback) {
+    return <h1>Carregando...</h1>;
+  }
 
   return (
     <>
@@ -93,14 +98,26 @@ export default function Post({ post }: PostProps) {
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  // const prismic = getPrismicClient();
-  // const posts = await prismic.query(TODO);
+export const getStaticPaths = async () => {
+  const prismic = getPrismicClient();
+  const posts = await prismic.query(
+    [Primisc.predicates.at('document.type', 'post')],
+    {
+      fetch: ['post.slug'],
+      pageSize: 100,
+    }
+  );
+
+  const paths = posts.results.map(post => {
+    return {
+      params: { slug: post.uid },
+    };
+  });
+
   return {
-    paths: [],
-    fallback: 'blocking',
+    paths,
+    fallback: 'true',
   };
-  // TODO
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
